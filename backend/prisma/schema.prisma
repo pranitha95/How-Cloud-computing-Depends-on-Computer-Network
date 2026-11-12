@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model NetworkProfile {
+  id              Int      @id @default(1)
+  latencyMs       Int      @default(25)
+  jitterMs        Int      @default(0)
+  lossPct         Float    @default(0)
+  bandwidthKbps   Int      @default(50000)
+  failedLinks     String   @default("[]")
+  cdnEnabled      Boolean  @default(false)
+  replicaEnabled  Boolean  @default(true)
+  secondDcEnabled Boolean  @default(false)
+  chaosMode       Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+model Preset {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  description     String
+  latencyMs       Int
+  jitterMs        Int
+  lossPct         Float
+  bandwidthKbps   Int
+  failedLinks     String
+  cdnEnabled      Boolean  @default(false)
+  replicaEnabled  Boolean  @default(true)
+  secondDcEnabled Boolean  @default(false)
+  createdAt       DateTime @default(now())
+}
+
+model CloudObject {
+  id              Int      @id @default(autoincrement())
+  filename        String
+  sizeBytes       Int
+  durationMs      Int
+  simulatedMs     Int
+  retries         Int
+  throughputKbps  Float
+  success         Boolean
+  createdAt       DateTime @default(now())
+}
+
+model DbRecord {
+  id        Int             @id @default(autoincrement())
+  payload   String
+  primaryAt DateTime        @default(now())
+  replica   ReplicaRecord?
+}
+
+model ReplicaRecord {
+  id       Int       @id @default(autoincrement())
+  recordId Int       @unique
+  record   DbRecord  @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  synced   Boolean   @default(false)
+  lagMs    Int       @default(0)
+  syncedAt DateTime?
+}
+
+model Experiment {
+  id        Int                @id @default(autoincrement())
+  name      String
+  notes     String             @default("")
+  startedAt DateTime           @default(now())
+  endedAt   DateTime?
+  samples   TelemetrySample[]
+}
+
+model TelemetrySample {
+  id             Int         @id @default(autoincrement())
+  experimentId   Int?
+  experiment     Experiment? @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  ts             DateTime    @default(now())
+  latencyMs      Int
+  lossPct        Float
+  bandwidthKbps  Int
+  health         Float
+  uploadKbps     Float
+  videoQuality   String
+  replicaLagMs   Int
+  commentary     String
+}
+
+model ChallengeRun {
+  id          Int      @id @default(autoincrement())
+  challengeId String
+  success     Boolean
+  score       Int
+  detail      String
+  createdAt   DateTime @default(now())
+}
+
+model CommentaryEvent {
+  id        Int      @id @default(autoincrement())
+  message   String
+  severity  String
+  createdAt DateTime @default(now())
+}

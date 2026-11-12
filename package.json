@@ -1,0 +1,14 @@
+{
+  "name": "cloud-under-stress",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive lab showing how cloud computing depends on computer networks",
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "test": "npm test --prefix backend",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
